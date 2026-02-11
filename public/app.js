@@ -35,10 +35,10 @@ const voteAnnouncerEl = document.getElementById("voteAnnouncer");
 const streakTarget = 5;
 const favoritesStorageKey = "tekken-babes-favorites";
 const MODES = [
-  { id: "all", label: "All Roster", minGame: 1, maxGame: 8 },
-  { id: "classic", label: "Classic 1-3", minGame: 1, maxGame: 3 },
-  { id: "modern", label: "Modern 4-6", minGame: 4, maxGame: 6 },
-  { id: "new-era", label: "New Era 7-8", minGame: 7, maxGame: 8 }
+  { id: "all", label: "All Tea", minGame: 1, maxGame: 8 },
+  { id: "classic", label: "Old School 1-3", minGame: 1, maxGame: 3 },
+  { id: "modern", label: "Chaos 4-6", minGame: 4, maxGame: 6 },
+  { id: "new-era", label: "New Heat 7-8", minGame: 7, maxGame: 8 }
 ];
 
 let characters = [];
@@ -64,6 +64,12 @@ const winSublines = [
   "Charisma crit activated.",
   "This was not a close call.",
   "Zero effort, maximum slay."
+];
+const VOTE_TAGLINES = [
+  "Tap to spill tea",
+  "Tap to cast the hot vote",
+  "Tap to keep the drama alive",
+  "Tap to pick your main crush"
 ];
 const PERSONA_PACK = {
   nina: {
@@ -229,6 +235,51 @@ function playNoiseBurst(ctx, start, duration, volume = 0.13) {
 
 function note(freq, semitones) {
   return freq * 2 ** (semitones / 12);
+}
+
+function playVoteSound(character, lane = "left") {
+  const ctx = ensureAudioContext();
+  if (!ctx) {
+    return;
+  }
+  if (ctx.state === "suspended") {
+    ctx.resume().catch(() => {});
+  }
+  const persona = character ? getPersonaPack(character) : PERSONA_PACK.default;
+  const personaSlug = getPersonaSlug(persona);
+  const baseByPersona = {
+    "icy-baddie": 659.25,
+    "villain-crush": 622.25,
+    "chaos-bestie": 698.46,
+    "cute-menace": 739.99,
+    "soft-power": 587.33,
+    "rich-girl-aura": 783.99
+  };
+  const base = baseByPersona[personaSlug] || 659.25;
+  const directionShift = lane === "right" ? 2 : 0;
+  const now = ctx.currentTime + 0.004;
+
+  // Lip-gloss click + camera snap combo.
+  playTone(ctx, {
+    start: now,
+    duration: 0.055,
+    frequency: note(base, directionShift),
+    endFrequency: note(base, directionShift + 2),
+    type: "square",
+    volume: 0.065,
+    attack: 0.004,
+    release: 0.03
+  });
+  playNoiseBurst(ctx, now + 0.014, 0.03, 0.04);
+  playTone(ctx, {
+    start: now + 0.038,
+    duration: 0.07,
+    frequency: note(base, directionShift + 7),
+    type: "triangle",
+    volume: 0.06,
+    attack: 0.006,
+    release: 0.04
+  });
 }
 
 function playCelebrationSound(character, isTournamentWin = false) {
@@ -399,7 +450,7 @@ function randomCharacter(pool, excludeIds = []) {
 
 function updateStatusText() {
   const champion = characters.find((character) => character.id === championId);
-  setText(championNameEl, champion ? champion.name : "No champion yet");
+  setText(championNameEl, champion ? champion.name : "No icon crowned yet");
   setText(streakCountEl, String(streak));
   setText(sessionVotesEl, String(sessionVotes));
   setText(sessionBestStreakEl, String(sessionBestStreak));
@@ -520,6 +571,18 @@ function buildCard(character, lane) {
       }
     });
   }
+  const taglineEl = card.querySelector(".character-tagline");
+  if (taglineEl) {
+    const personaLines = {
+      "icy-baddie": "Tap to vote cold and iconic",
+      "villain-crush": "Tap to choose the bad decision",
+      "chaos-bestie": "Tap to vote for pure chaos",
+      "cute-menace": "Tap to vote cute but dangerous",
+      "soft-power": "Tap to vote calm but lethal"
+    };
+    const line = personaLines[getPersonaSlug(persona)] || VOTE_TAGLINES[Math.floor(Math.random() * VOTE_TAGLINES.length)];
+    setText(taglineEl, line);
+  }
   if (favoriteBtn) {
     favoriteBtn.classList.toggle("is-favorite", favorites.has(character.id));
     favoriteBtn.addEventListener("click", (event) => {
@@ -542,7 +605,7 @@ function renderArena() {
   arenaEl.innerHTML = "";
   const roster = getModeRoster();
   if (roster.length < 2) {
-    arenaEl.innerHTML = "<p>Filters left fewer than two characters. Broaden search or disable Favorites Only.</p>";
+    arenaEl.innerHTML = "<p>Tea filters got too strict. Add more icons or switch off Besties Only.</p>";
     roundPair = [];
     return;
   }
@@ -609,7 +672,7 @@ async function loadHistory() {
   historyListEl.innerHTML = "";
   if (!data.history.length) {
     const emptyItem = document.createElement("li");
-    emptyItem.innerHTML = '<span>No crowns yet</span><span class="history-time">be the first</span>';
+    emptyItem.innerHTML = '<span>No tea yet</span><span class="history-time">start the drama</span>';
     historyListEl.appendChild(emptyItem);
     return;
   }
@@ -644,7 +707,7 @@ function renderTournamentBoard() {
     .slice(0, 8);
   if (!entries.length) {
     const item = document.createElement("li");
-    item.innerHTML = `<span>No crowns yet</span><span class="wins">0 / ${tournamentTarget}</span>`;
+    item.innerHTML = `<span>No diary cover stolen yet</span><span class="wins">0 / ${tournamentTarget}</span>`;
     tournamentBoardEl.appendChild(item);
     return;
   }
@@ -757,7 +820,7 @@ function resetRoundState(forceResetChampion = false) {
 function updateFavoritesOnlyLabel() {
   const buttons = [favoritesOnlyBtn, favoritesOnlyBtnClone].filter(Boolean);
   for (const button of buttons) {
-    button.textContent = `Favorites Only: ${favoritesOnly ? "On" : "Off"}`;
+    button.textContent = `Besties Only: ${favoritesOnly ? "On" : "Off"}`;
     button.classList.toggle("active", favoritesOnly);
   }
 }
@@ -778,7 +841,7 @@ function downloadWinnerCard(character) {
 
   ctx.fillStyle = "#fff";
   ctx.font = "700 62px Arial";
-  ctx.fillText("Tekken Babes Champion", 60, 110);
+  ctx.fillText("Tekken Babes Crowned Icon", 60, 110);
   ctx.font = "700 84px Arial";
   ctx.fillText(character.name, 60, 220);
   ctx.font = "500 34px Arial";
@@ -792,6 +855,7 @@ function downloadWinnerCard(character) {
 }
 
 async function onVote(characterId, lane = null) {
+  playVoteSound(getCharacterById(characterId), lane || "left");
   sessionVotes += 1;
   if (championId === characterId) {
     streak += 1;
