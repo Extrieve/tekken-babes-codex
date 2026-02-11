@@ -510,9 +510,20 @@ async function init() {
   favorites = loadFavorites();
   updateFavoritesOnlyLabel();
   const response = await fetch("/api/characters");
+  if (!response.ok) {
+    throw new Error(`Failed to fetch characters: ${response.status}`);
+  }
   const data = await response.json();
   characters = data.characters;
   renderModeFilters();
+  if (getModeRoster().length < 2) {
+    searchTerm = "";
+    favoritesOnly = false;
+    updateFavoritesOnlyLabel();
+    if (searchInputEl) {
+      searchInputEl.value = "";
+    }
+  }
   resetRoundState(true);
   renderTournamentBoard();
   await Promise.all([loadLeaderboard(), loadHistory()]);
@@ -520,5 +531,5 @@ async function init() {
 
 init().catch((error) => {
   console.error(error);
-  arenaEl.innerHTML = "<p>Failed to load game data. Refresh to try again.</p>";
+  arenaEl.innerHTML = `<p>Failed to load game data. ${error.message || "Refresh to try again."}</p>`;
 });
