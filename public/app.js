@@ -218,19 +218,33 @@ function toggleFavorite(characterId) {
 function buildCard(character) {
   const card = characterCardTemplate.content.firstElementChild.cloneNode(true);
   card.dataset.characterId = character.id;
-  card.querySelector(".character-name").textContent = character.name;
-  card.querySelector(".character-initial").textContent = character.name.slice(0, 1).toUpperCase();
+  const nameEl = card.querySelector(".character-name");
+  const initialEl = card.querySelector(".character-initial");
   const photo = card.querySelector(".character-photo");
   const favoriteBtn = card.querySelector(".favorite-btn");
-  photo.src = character.imageUrl;
-  photo.alt = `${character.name} stylized portrait`;
-  favoriteBtn.textContent = favorites.has(character.id) ? "★" : "☆";
-  favoriteBtn.addEventListener("click", (event) => {
-    event.stopPropagation();
-    toggleFavorite(character.id);
-  });
+
+  setText(nameEl, character.name);
+  setText(initialEl, character.name.slice(0, 1).toUpperCase());
+
+  if (photo) {
+    photo.src = character.imageUrl;
+    photo.alt = `${character.name} stylized portrait`;
+  }
+  if (favoriteBtn) {
+    setText(favoriteBtn, favorites.has(character.id) ? "*" : "+");
+    favoriteBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      toggleFavorite(character.id);
+    });
+  }
 
   card.addEventListener("click", () => onVote(character.id));
+  card.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onVote(character.id);
+    }
+  });
   return card;
 }
 
