@@ -22,6 +22,14 @@ db.exec(`
   );
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS crown_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    character_id TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );
+`);
+
 const insertCharacter = db.prepare(`
   INSERT INTO character_wins (character_id, wins)
   VALUES (?, 0)
@@ -44,6 +52,18 @@ const incrementWinStmt = db.prepare(`
   WHERE character_id = ?;
 `);
 
+const insertHistoryStmt = db.prepare(`
+  INSERT INTO crown_history (character_id)
+  VALUES (?);
+`);
+
+const getRecentCrownsStmt = db.prepare(`
+  SELECT character_id, created_at
+  FROM crown_history
+  ORDER BY id DESC
+  LIMIT ?;
+`);
+
 function getLeaderboard() {
   return getLeaderboardStmt.all();
 }
@@ -53,7 +73,27 @@ function incrementCharacterWin(characterId) {
   return result.changes === 1;
 }
 
+const recordCharacterCrownTxn = db.transaction((characterId) => {
+  const winResult = incrementWinStmt.run(characterId);
+  if (winResult.changes !== 1) {
+    return false;
+  }
+  insertHistoryStmt.run(characterId);
+  return true;
+});
+
+function recordCharacterCrown(characterId) {
+  return recordCharacterCrownTxn(characterId);
+}
+
+function getRecentCrowns(limit = 10) {
+  const safeLimit = Math.max(1, Math.min(50, Number(limit) || 10));
+  return getRecentCrownsStmt.all(safeLimit);
+}
+
 module.exports = {
   getLeaderboard,
-  incrementCharacterWin
+  incrementCharacterWin,
+  recordCharacterCrown,
+  getRecentCrowns
 };

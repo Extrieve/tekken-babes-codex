@@ -23,6 +23,7 @@
         <p class="subtitle">
           Pick between two icons. Keep a fighter alive for 5 straight votes to trigger a victory celebration.
         </p>
+        <p class="subtitle key-hint">Pro tip: use left/right arrow keys to vote fast.</p>
       </header>
 
       <section class="status-panel">
@@ -34,15 +35,36 @@
           <span class="label">Streak</span>
           <strong><span id="streakCount">0</span> / 5</strong>
         </div>
+        <div class="status-item">
+          <span class="label">Session Votes</span>
+          <strong id="sessionVotes">0</strong>
+        </div>
+        <div class="status-item">
+          <span class="label">Longest Session Streak</span>
+          <strong id="sessionBestStreak">0</strong>
+        </div>
+      </section>
+
+      <section class="mode-panel">
+        <span class="label">Roster Mode</span>
+        <div class="mode-filters" id="modeFilters"></div>
       </section>
 
       <section class="arena" id="arena"></section>
 
-      <section class="leaderboard-wrap">
-        <h2>Global Leaderboard</h2>
-        <p class="leaderboard-note">Characters with the most 5-streak crowns rise to the top.</p>
-        <ol id="leaderboard" class="leaderboard"></ol>
-      </section>
+      <div class="meta-grid">
+        <section class="leaderboard-wrap">
+          <h2>Global Leaderboard</h2>
+          <p class="leaderboard-note">Characters with the most 5-streak crowns rise to the top.</p>
+          <ol id="leaderboard" class="leaderboard"></ol>
+        </section>
+
+        <section class="history-wrap">
+          <h2>Recent Crowns</h2>
+          <p class="leaderboard-note">Latest streak champions from every player session.</p>
+          <ol id="historyList" class="leaderboard"></ol>
+        </section>
+      </div>
     </main>
 
     <section id="celebrationScreen" class="celebration hidden" aria-live="polite">

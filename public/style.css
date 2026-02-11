@@ -57,6 +57,11 @@ body {
   color: var(--muted);
 }
 
+.key-hint {
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+}
+
 .status-panel {
   margin-top: 1.4rem;
   display: grid;
@@ -79,6 +84,38 @@ body {
 
 .status-item strong {
   font-size: 1.1rem;
+}
+
+.mode-panel {
+  margin-top: 1rem;
+  border: 1px solid #ffffff2c;
+  border-radius: 14px;
+  padding: 0.8rem 1rem;
+  background: #0d1323cc;
+}
+
+.mode-filters {
+  margin-top: 0.55rem;
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.mode-chip {
+  border: 1px solid #ffffff42;
+  background: #0b1120;
+  color: #f8f3e8;
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.mode-chip.active {
+  background: linear-gradient(130deg, #f59e0b, #ef4444);
+  color: #1d0f1e;
+  border-color: transparent;
+  font-weight: 700;
 }
 
 .arena {
@@ -152,6 +189,17 @@ body {
   margin-top: 2rem;
 }
 
+.meta-grid {
+  margin-top: 1.1rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.history-wrap {
+  margin-top: 2rem;
+}
+
 .leaderboard-note {
   margin: 0.25rem 0 0.9rem;
   color: var(--muted);
@@ -178,6 +226,11 @@ body {
 .leaderboard .wins {
   font-weight: 700;
   color: var(--accent-2);
+}
+
+.history-time {
+  color: #d2cae4;
+  font-size: 0.88rem;
 }
 
 .celebration {
@@ -265,5 +318,9 @@ body {
 
   .character-art {
     min-height: 180px;
+  }
+
+  .meta-grid {
+    grid-template-columns: 1fr;
   }
 }

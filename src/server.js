@@ -1,7 +1,7 @@
 const path = require("node:path");
 const express = require("express");
 const characters = require("./characters");
-const { getLeaderboard, incrementCharacterWin } = require("./db");
+const { getLeaderboard, recordCharacterCrown, getRecentCrowns } = require("./db");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -36,6 +36,26 @@ app.get("/api/leaderboard", (_req, res) => {
   res.json({ leaderboard });
 });
 
+app.get("/api/history", (req, res) => {
+  const limit = Number(req.query.limit) || 10;
+  const byId = new Map(characters.map((character) => [character.id, character]));
+  const history = getRecentCrowns(limit)
+    .map((entry) => {
+      const character = byId.get(entry.character_id);
+      if (!character) {
+        return null;
+      }
+      return {
+        id: character.id,
+        name: character.name,
+        createdAt: entry.created_at
+      };
+    })
+    .filter(Boolean);
+
+  res.json({ history });
+});
+
 app.post("/api/wins", (req, res) => {
   const characterId = req.body?.characterId;
   const character = getCharacterById(characterId);
@@ -43,7 +63,7 @@ app.post("/api/wins", (req, res) => {
     return res.status(400).json({ error: "Invalid characterId." });
   }
 
-  const updated = incrementCharacterWin(characterId);
+  const updated = recordCharacterCrown(characterId);
   if (!updated) {
     return res.status(500).json({ error: "Failed to record win." });
   }
