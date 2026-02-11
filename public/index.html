@@ -116,9 +116,19 @@
     <section id="celebrationScreen" class="celebration hidden" aria-live="polite">
       <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
       <div class="celebration-card">
-        <p class="eyebrow">Crown Secured</p>
-        <h2 id="celebrationName"></h2>
-        <p id="celebrationQuote" class="celebration-quote"></p>
+        <div class="celebration-glow"></div>
+        <div class="celebration-topline">
+          <p class="eyebrow">Crown Secured</p>
+          <span id="celebrationBadge" class="celebration-badge">Hot Streak</span>
+        </div>
+        <div class="celebration-hero">
+          <img id="celebrationPortrait" alt="" />
+          <div class="celebration-copy">
+            <h2 id="celebrationName"></h2>
+            <p id="celebrationSubline" class="celebration-subline">Main character moment.</p>
+            <p id="celebrationQuote" class="celebration-quote"></p>
+          </div>
+        </div>
         <div class="celebration-actions">
           <button id="downloadCardBtn" class="action-button" type="button">Download Winner Card</button>
           <button id="nextRoundBtn" class="action-button" type="button">Start New Round</button>
@@ -133,12 +143,12 @@
           <img class="character-photo" loading="lazy" decoding="async" alt="" />
           <span class="character-initial"></span>
         </div>
-    <div class="character-meta">
-      <h3 class="character-name"></h3>
-      <p class="character-tagline">Tap to vote hottest</p>
-    </div>
-  </div>
-</template>
+        <div class="character-meta">
+          <h3 class="character-name"></h3>
+          <p class="character-tagline">Tap to vote hottest</p>
+        </div>
+      </div>
+    </template>
 
     <script src="/app.js" defer></script>
   </body>

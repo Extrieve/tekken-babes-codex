@@ -22,6 +22,9 @@ const rosterGridEl = document.getElementById("rosterGrid");
 const celebrationScreenEl = document.getElementById("celebrationScreen");
 const celebrationNameEl = document.getElementById("celebrationName");
 const celebrationQuoteEl = document.getElementById("celebrationQuote");
+const celebrationSublineEl = document.getElementById("celebrationSubline");
+const celebrationBadgeEl = document.getElementById("celebrationBadge");
+const celebrationPortraitEl = document.getElementById("celebrationPortrait");
 const nextRoundBtn = document.getElementById("nextRoundBtn");
 const downloadCardBtn = document.getElementById("downloadCardBtn");
 const characterCardTemplate = document.getElementById("characterCardTemplate");
@@ -54,6 +57,13 @@ let tournamentTarget = 3;
 let tournamentScores = {};
 let lastCrownWinner = null;
 const memeTags = ["SMASH", "RIZZ", "GYATT", "GOATED", "W PICK", "HEAT", "BADDIE"];
+const winBadges = ["Main Slay Event", "Certified Serve", "Face Card Never Declined", "Sassy Sweep"];
+const winSublines = [
+  "Walked in, stole votes, left no crumbs.",
+  "Charisma crit activated.",
+  "This was not a close call.",
+  "Zero effort, maximum slay."
+];
 
 function setText(el, value) {
   if (el) {
@@ -404,11 +414,28 @@ function openCelebration(character, isTournamentWin = false) {
   celebrationQuoteEl.textContent = isTournamentWin
     ? `"${character.quote}" Tournament target reached: ${tournamentTarget} crowns.`
     : `"${character.quote}"`;
+  if (celebrationSublineEl) {
+    celebrationSublineEl.textContent = winSublines[Math.floor(Math.random() * winSublines.length)];
+  }
+  if (celebrationBadgeEl) {
+    celebrationBadgeEl.textContent = winBadges[Math.floor(Math.random() * winBadges.length)];
+  }
+  if (celebrationPortraitEl) {
+    celebrationPortraitEl.src = character.imageUrl;
+    celebrationPortraitEl.alt = `${character.name} celebration portrait`;
+    celebrationPortraitEl.onerror = () => {
+      if (character.fallbackImageUrl && celebrationPortraitEl.src.indexOf(character.fallbackImageUrl) === -1) {
+        celebrationPortraitEl.src = character.fallbackImageUrl;
+      }
+    };
+  }
   celebrationScreenEl.classList.remove("hidden");
-  celebrationScreenEl.style.background = `linear-gradient(140deg, ${character.accentA}cc, ${character.accentB}bb)`;
-  celebrationScreenEl.querySelector(
-    ".celebration-card"
-  ).style.background = `linear-gradient(160deg, ${character.accentA}, ${character.accentB})`;
+  celebrationScreenEl.style.background = `radial-gradient(circle at 20% 10%, ${character.accentA}88 0%, transparent 42%), radial-gradient(circle at 86% 0%, ${character.accentB}88 0%, transparent 42%), #090611d9`;
+  const cardEl = celebrationScreenEl.querySelector(".celebration-card");
+  if (cardEl) {
+    cardEl.style.setProperty("--win-a", character.accentA);
+    cardEl.style.setProperty("--win-b", character.accentB);
+  }
   runConfettiBurst([character.accentA, character.accentB, "#ffffff", "#ffe08c"]);
   playCelebrationSound();
 }
