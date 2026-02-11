@@ -9,11 +9,15 @@ Fun voting game: two Tekken characters appear side by side, players choose the h
 - 5-streak win condition with character-themed celebration
 - Cross-era roster spanning Tekken 1 through Tekken 8
 - Roster mode filters (`All`, `Classic 1-3`, `Modern 4-6`, `New Era 7-8`)
+- Character search + favorites filter (persisted in local storage)
+- Tournament mode (first to target crowns)
+- Downloadable champion share cards (`.png`)
 - Session stats (votes + best streak)
 - Recent crowns feed
 - Sassy character quotes on victory
 - Keyboard voting (`Left Arrow` / `Right Arrow`)
 - Global leaderboard persisted in SQLite
+- Character posters served from local API (`/api/character-image/:id.svg`) for consistent image loading
 
 ## Tech Stack
 
@@ -48,6 +52,7 @@ This repo includes `render.yaml` for one-click blueprint deploy.
 ## API
 
 - `GET /api/characters`
+- `GET /api/character-image/:id.svg`
 - `GET /api/leaderboard`
 - `GET /api/history?limit=10`
 - `POST /api/wins` with JSON `{ "characterId": "jin" }`

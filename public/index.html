@@ -48,6 +48,27 @@
       <section class="mode-panel">
         <span class="label">Roster Mode</span>
         <div class="mode-filters" id="modeFilters"></div>
+        <div class="mode-tools">
+          <input id="searchInput" class="search-input" type="search" placeholder="Search character name..." />
+          <button id="favoritesOnlyBtn" class="mode-chip" type="button">Favorites Only: Off</button>
+        </div>
+      </section>
+
+      <section class="tournament-panel">
+        <div>
+          <span class="label">Tournament Mode</span>
+          <p class="leaderboard-note">First to target crowns wins the session tournament.</p>
+        </div>
+        <div class="tournament-controls">
+          <label for="tournamentTarget">Target Crowns</label>
+          <select id="tournamentTarget">
+            <option value="1">1</option>
+            <option value="3" selected>3</option>
+            <option value="5">5</option>
+          </select>
+          <button id="resetTournamentBtn" class="mode-chip" type="button">Reset Tournament</button>
+        </div>
+        <ol id="tournamentBoard" class="leaderboard"></ol>
       </section>
 
       <section class="arena" id="arena"></section>
@@ -73,13 +94,17 @@
         <p class="eyebrow">Crown Secured</p>
         <h2 id="celebrationName"></h2>
         <p id="celebrationQuote" class="celebration-quote"></p>
-        <button id="nextRoundBtn" class="action-button">Start New Round</button>
+        <div class="celebration-actions">
+          <button id="downloadCardBtn" class="action-button" type="button">Download Winner Card</button>
+          <button id="nextRoundBtn" class="action-button" type="button">Start New Round</button>
+        </div>
       </div>
     </section>
 
     <template id="characterCardTemplate">
       <button class="character-card" type="button">
         <div class="character-art">
+          <button class="favorite-btn" type="button" aria-label="Toggle favorite">☆</button>
           <img class="character-photo" loading="lazy" decoding="async" alt="" />
           <span class="character-initial"></span>
         </div>

@@ -13,8 +13,55 @@ function getCharacterById(characterId) {
   return characters.find((character) => character.id === characterId);
 }
 
+function escapeXml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
+}
+
+function createCharacterPosterSvg(character) {
+  const title = escapeXml(character.name);
+  const subtitle = escapeXml(`Tekken ${character.debutGame} debut`);
+  const initial = escapeXml(character.name.slice(0, 1).toUpperCase());
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="700" height="900" viewBox="0 0 700 900">
+    <defs>
+      <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${character.accentA}" />
+        <stop offset="100%" stop-color="${character.accentB}" />
+      </linearGradient>
+      <linearGradient id="stripe" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#ffffff22" />
+        <stop offset="100%" stop-color="#ffffff00" />
+      </linearGradient>
+    </defs>
+    <rect width="700" height="900" fill="url(#bg)" />
+    <rect y="540" width="700" height="360" fill="#00000055" />
+    <rect y="0" width="700" height="160" fill="url(#stripe)" />
+    <text x="50%" y="210" text-anchor="middle" fill="#ffffffcc" font-size="160" font-family="Arial">${initial}</text>
+    <text x="50%" y="680" text-anchor="middle" fill="#fff" font-size="56" font-family="Arial" font-weight="700">${title}</text>
+    <text x="50%" y="746" text-anchor="middle" fill="#f5f5f5" font-size="34" font-family="Arial">${subtitle}</text>
+  </svg>`;
+}
+
 app.get("/api/characters", (_req, res) => {
-  res.json({ characters });
+  const payload = characters.map((character) => ({
+    ...character,
+    imageUrl: `/api/character-image/${character.id}.svg`
+  }));
+  res.json({ characters: payload });
+});
+
+app.get("/api/character-image/:id.svg", (req, res) => {
+  const character = getCharacterById(req.params.id);
+  if (!character) {
+    return res.status(404).send("Not found");
+  }
+  const svg = createCharacterPosterSvg(character);
+  res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
+  return res.send(svg);
 });
 
 app.get("/api/leaderboard", (_req, res) => {
