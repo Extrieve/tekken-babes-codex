@@ -46,6 +46,7 @@
     </main>
 
     <section id="celebrationScreen" class="celebration hidden" aria-live="polite">
+      <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
       <div class="celebration-card">
         <p class="eyebrow">Crown Secured</p>
         <h2 id="celebrationName"></h2>
@@ -57,6 +58,7 @@
     <template id="characterCardTemplate">
       <button class="character-card" type="button">
         <div class="character-art">
+          <img class="character-photo" loading="lazy" decoding="async" alt="" />
           <span class="character-initial"></span>
         </div>
         <div class="character-meta">
