@@ -175,7 +175,63 @@ function ensureAudioContext() {
   return audioCtx;
 }
 
-function playCelebrationSound() {
+function playTone(ctx, config) {
+  const {
+    start,
+    duration,
+    frequency,
+    endFrequency = frequency,
+    type = "triangle",
+    volume = 0.15,
+    attack = 0.015,
+    release = 0.18,
+    detune = 0
+  } = config;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(frequency, start);
+  if (endFrequency !== frequency) {
+    osc.frequency.exponentialRampToValueAtTime(Math.max(1, endFrequency), start + duration);
+  }
+  osc.detune.setValueAtTime(detune, start);
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume), start + attack);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + Math.max(attack + 0.01, duration - release));
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(start);
+  osc.stop(start + duration);
+}
+
+function playNoiseBurst(ctx, start, duration, volume = 0.13) {
+  const sampleLength = Math.max(1, Math.floor(ctx.sampleRate * duration));
+  const buffer = ctx.createBuffer(1, sampleLength, ctx.sampleRate);
+  const channel = buffer.getChannelData(0);
+  for (let i = 0; i < sampleLength; i += 1) {
+    channel[i] = (Math.random() * 2 - 1) * (1 - i / sampleLength);
+  }
+  const source = ctx.createBufferSource();
+  source.buffer = buffer;
+  const highPass = ctx.createBiquadFilter();
+  highPass.type = "highpass";
+  highPass.frequency.setValueAtTime(1200, start);
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(volume, start + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  source.connect(highPass);
+  highPass.connect(gain);
+  gain.connect(ctx.destination);
+  source.start(start);
+  source.stop(start + duration);
+}
+
+function note(freq, semitones) {
+  return freq * 2 ** (semitones / 12);
+}
+
+function playCelebrationSound(character, isTournamentWin = false) {
   const ctx = ensureAudioContext();
   if (!ctx) {
     return;
@@ -184,21 +240,87 @@ function playCelebrationSound() {
     ctx.resume().catch(() => {});
   }
 
-  const now = ctx.currentTime;
-  const notes = [523.25, 659.25, 783.99, 1046.5];
-  notes.forEach((freq, index) => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = index % 2 === 0 ? "sawtooth" : "triangle";
-    osc.frequency.setValueAtTime(freq, now + index * 0.08);
-    gain.gain.setValueAtTime(0.0001, now + index * 0.08);
-    gain.gain.exponentialRampToValueAtTime(0.18, now + index * 0.08 + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.08 + 0.28);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(now + index * 0.08);
-    osc.stop(now + index * 0.08 + 0.3);
+  const persona = character ? getPersonaPack(character) : PERSONA_PACK.default;
+  const personaSlug = getPersonaSlug(persona);
+  const baseByPersona = {
+    "icy-baddie": 329.63,
+    "villain-crush": 311.13,
+    "chaos-bestie": 349.23,
+    "cute-menace": 392,
+    "soft-power": 293.66,
+    "rich-girl-aura": 369.99
+  };
+  const base = baseByPersona[personaSlug] || 329.63;
+  const now = ctx.currentTime + 0.01;
+
+  // Drum-ish impact so wins feel heavier.
+  playTone(ctx, {
+    start: now,
+    duration: 0.22,
+    frequency: 92,
+    endFrequency: 46,
+    type: "sine",
+    volume: 0.35,
+    attack: 0.004,
+    release: 0.2
   });
+  playTone(ctx, {
+    start: now + 0.14,
+    duration: 0.2,
+    frequency: 110,
+    endFrequency: 55,
+    type: "sine",
+    volume: 0.26,
+    attack: 0.004,
+    release: 0.18
+  });
+  playNoiseBurst(ctx, now + 0.08, 0.13, 0.08);
+  playNoiseBurst(ctx, now + 0.3, 0.12, 0.1);
+
+  // Glam chord bed.
+  const chord = [base, note(base, 3), note(base, 7)];
+  chord.forEach((freq, index) => {
+    playTone(ctx, {
+      start: now + 0.22,
+      duration: 0.95,
+      frequency: freq,
+      type: index === 0 ? "triangle" : "sawtooth",
+      volume: 0.09,
+      attack: 0.05,
+      release: 0.3,
+      detune: index === 1 ? 6 : 0
+    });
+  });
+
+  // Arp sparkle tail for the "sassy" finish.
+  const arp = [12, 10, 7, 15, 19, 22];
+  arp.forEach((interval, index) => {
+    playTone(ctx, {
+      start: now + 0.25 + index * 0.08,
+      duration: 0.18,
+      frequency: note(base, interval),
+      type: "square",
+      volume: 0.11,
+      attack: 0.01,
+      release: 0.12
+    });
+  });
+
+  if (isTournamentWin) {
+    // Extra fanfare layer for tournament victories.
+    [0, 4, 7, 12].forEach((interval, index) => {
+      playTone(ctx, {
+        start: now + 0.68 + index * 0.075,
+        duration: 0.28,
+        frequency: note(base, interval + 12),
+        type: "sawtooth",
+        volume: 0.16,
+        attack: 0.01,
+        release: 0.18
+      });
+    });
+    playNoiseBurst(ctx, now + 0.72, 0.22, 0.13);
+  }
 }
 
 function resizeConfettiCanvas() {
@@ -577,7 +699,7 @@ function openCelebration(character, isTournamentWin = false) {
     cardEl.dataset.persona = getPersonaSlug(persona);
   }
   runConfettiBurst([character.accentA, character.accentB, "#ffffff", "#ffe08c"]);
-  playCelebrationSound();
+  playCelebrationSound(character, isTournamentWin);
 }
 
 function closeCelebration() {
