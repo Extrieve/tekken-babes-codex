@@ -53,6 +53,7 @@ let favorites = new Set();
 let tournamentTarget = 3;
 let tournamentScores = {};
 let lastCrownWinner = null;
+const memeTags = ["SMASH", "RIZZ", "GYATT", "GOATED", "W PICK", "HEAT", "BADDIE"];
 
 function setText(el, value) {
   if (el) {
@@ -232,6 +233,7 @@ function toggleFavorite(characterId) {
 function buildCard(character, lane) {
   const card = characterCardTemplate.content.firstElementChild.cloneNode(true);
   card.dataset.characterId = character.id;
+  card.dataset.memeTag = memeTags[Math.floor(Math.random() * memeTags.length)];
   const nameEl = card.querySelector(".character-name");
   const initialEl = card.querySelector(".character-initial");
   const photo = card.querySelector(".character-photo");
