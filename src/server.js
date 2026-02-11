@@ -7,6 +7,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const fallbackImageUrl = (characterId) => `/api/character-image/${characterId}.svg`;
 const characterImageUrlById = new Map();
+const characterWikiImageSourceById = new Map();
+const proxiedImageCacheById = new Map();
 let imagesHydrationPromise = null;
 
 app.use(express.json());
@@ -116,7 +118,8 @@ async function hydrateCharacterImages() {
           thumbnail = await fetchWikipediaThumbnail(character.wikiTitle);
         }
         if (thumbnail) {
-          characterImageUrlById.set(character.id, thumbnail);
+          characterWikiImageSourceById.set(character.id, thumbnail);
+          characterImageUrlById.set(character.id, `/api/wiki-image/${character.id}`);
         }
       })
     );
@@ -142,6 +145,50 @@ app.get("/api/character-image/:id.svg", (req, res) => {
   const svg = createCharacterPosterSvg(character);
   res.setHeader("Content-Type", "image/svg+xml; charset=utf-8");
   return res.send(svg);
+});
+
+app.get("/api/wiki-image/:id", async (req, res) => {
+  const characterId = req.params.id;
+  const character = getCharacterById(characterId);
+  if (!character) {
+    return res.status(404).send("Not found");
+  }
+
+  const cached = proxiedImageCacheById.get(characterId);
+  if (cached) {
+    res.setHeader("Content-Type", cached.contentType);
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    return res.send(cached.buffer);
+  }
+
+  const sourceUrl = characterWikiImageSourceById.get(characterId);
+  if (!sourceUrl) {
+    res.redirect(fallbackImageUrl(characterId));
+    return undefined;
+  }
+
+  try {
+    const upstream = await fetch(sourceUrl, {
+      headers: {
+        "User-Agent": "tekken-babes-codex/1.0",
+        Referer: "https://tekken.fandom.com/"
+      }
+    });
+    if (!upstream.ok) {
+      res.redirect(fallbackImageUrl(characterId));
+      return undefined;
+    }
+
+    const buffer = Buffer.from(await upstream.arrayBuffer());
+    const contentType = upstream.headers.get("content-type") || "image/jpeg";
+    proxiedImageCacheById.set(characterId, { buffer, contentType });
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Cache-Control", "public, max-age=86400");
+    return res.send(buffer);
+  } catch (_error) {
+    res.redirect(fallbackImageUrl(characterId));
+    return undefined;
+  }
 });
 
 app.get("/api/leaderboard", (_req, res) => {
