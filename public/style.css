@@ -163,10 +163,11 @@ body {
   position: relative;
   overflow: hidden;
   border-radius: 14px;
-  min-height: 220px;
+  min-height: 280px;
   display: grid;
   place-items: center;
   margin-bottom: 0.9rem;
+  background: #0b1020;
 }
 
 .favorite-btn {
@@ -182,6 +183,17 @@ body {
   border-radius: 999px;
   cursor: pointer;
   font-size: 1rem;
+  display: grid;
+  place-items: center;
+}
+
+.favorite-btn::before {
+  content: "+";
+  font-weight: 700;
+}
+
+.favorite-btn.is-favorite::before {
+  content: "x";
 }
 
 .character-photo {
@@ -190,12 +202,20 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center top;
+  object-position: center 20%;
+  filter: saturate(1.08) contrast(1.02);
+}
+
+.character-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, #05070bcc 6%, transparent 45%);
 }
 
 .character-initial {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   font-family: "Racing Sans One", sans-serif;
   font-size: clamp(4rem, 12vw, 7rem);
   color: #ffffffd0;
@@ -379,7 +399,7 @@ body {
   }
 
   .character-art {
-    min-height: 180px;
+    min-height: 220px;
   }
 
   .meta-grid {

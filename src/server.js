@@ -5,6 +5,9 @@ const { getLeaderboard, recordCharacterCrown, getRecentCrowns } = require("./db"
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const fallbackImageUrl = (characterId) => `/api/character-image/${characterId}.svg`;
+const characterImageUrlById = new Map();
+let imagesHydrationPromise = null;
 
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), "public")));
@@ -46,10 +49,87 @@ function createCharacterPosterSvg(character) {
   </svg>`;
 }
 
-app.get("/api/characters", (_req, res) => {
+async function fetchWikipediaThumbnail(wikiTitle) {
+  if (!wikiTitle) {
+    return null;
+  }
+  const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`;
+  try {
+    const response = await fetch(url, {
+      headers: { "User-Agent": "tekken-babes-codex/1.0" }
+    });
+    if (!response.ok) {
+      return null;
+    }
+    const data = await response.json();
+    const thumbnail = data?.thumbnail?.source || null;
+    if (!thumbnail) {
+      return null;
+    }
+    if (thumbnail.includes("Tekken_Characters.jpg")) {
+      return null;
+    }
+    return thumbnail;
+  } catch (_error) {
+    return null;
+  }
+}
+
+async function fetchFandomThumbnail(title) {
+  if (!title) {
+    return null;
+  }
+  const url = `https://tekken.fandom.com/api.php?action=query&titles=${encodeURIComponent(
+    title
+  )}&prop=pageimages&format=json&pithumbsize=700`;
+  try {
+    const response = await fetch(url, {
+      headers: { "User-Agent": "tekken-babes-codex/1.0" }
+    });
+    if (!response.ok) {
+      return null;
+    }
+    const data = await response.json();
+    const pages = data?.query?.pages;
+    if (!pages) {
+      return null;
+    }
+    const firstPage = Object.values(pages)[0];
+    return firstPage?.thumbnail?.source || null;
+  } catch (_error) {
+    return null;
+  }
+}
+
+async function hydrateCharacterImages() {
+  for (const character of characters) {
+    characterImageUrlById.set(character.id, fallbackImageUrl(character.id));
+  }
+
+  const batchSize = 8;
+  for (let i = 0; i < characters.length; i += batchSize) {
+    const batch = characters.slice(i, i + batchSize);
+    await Promise.all(
+      batch.map(async (character) => {
+        let thumbnail = await fetchFandomThumbnail(character.name);
+        if (!thumbnail) {
+          thumbnail = await fetchWikipediaThumbnail(character.wikiTitle);
+        }
+        if (thumbnail) {
+          characterImageUrlById.set(character.id, thumbnail);
+        }
+      })
+    );
+  }
+}
+
+app.get("/api/characters", async (_req, res) => {
+  if (imagesHydrationPromise) {
+    await Promise.race([imagesHydrationPromise, new Promise((resolve) => setTimeout(resolve, 2500))]);
+  }
   const payload = characters.map((character) => ({
     ...character,
-    imageUrl: `/api/character-image/${character.id}.svg`
+    imageUrl: characterImageUrlById.get(character.id) || fallbackImageUrl(character.id)
   }));
   res.json({ characters: payload });
 });
@@ -118,6 +198,13 @@ app.post("/api/wins", (req, res) => {
   return res.status(201).json({ ok: true });
 });
 
-app.listen(PORT, () => {
-  console.log(`Tekken Babes server running on http://localhost:${PORT}`);
-});
+function start() {
+  app.listen(PORT, () => {
+    console.log(`Tekken Babes server running on http://localhost:${PORT}`);
+  });
+  imagesHydrationPromise = hydrateCharacterImages().catch((error) => {
+    console.error("Failed to hydrate remote character images:", error);
+  });
+}
+
+start();

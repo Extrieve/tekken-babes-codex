@@ -231,7 +231,7 @@ function buildCard(character) {
     photo.alt = `${character.name} stylized portrait`;
   }
   if (favoriteBtn) {
-    setText(favoriteBtn, favorites.has(character.id) ? "*" : "+");
+    favoriteBtn.classList.toggle("is-favorite", favorites.has(character.id));
     favoriteBtn.addEventListener("click", (event) => {
       event.stopPropagation();
       toggleFavorite(character.id);
