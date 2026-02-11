@@ -30,6 +30,7 @@ const downloadCardBtn = document.getElementById("downloadCardBtn");
 const characterCardTemplate = document.getElementById("characterCardTemplate");
 const confettiCanvasEl = document.getElementById("confettiCanvas");
 const confettiCtx = confettiCanvasEl.getContext("2d");
+const voteAnnouncerEl = document.getElementById("voteAnnouncer");
 
 const streakTarget = 5;
 const favoritesStorageKey = "tekken-babes-favorites";
@@ -134,6 +135,10 @@ const PERSONA_PACK = {
 
 function getPersonaPack(character) {
   return PERSONA_PACK[character.id] || PERSONA_PACK.default;
+}
+
+function getPersonaSlug(persona) {
+  return (persona?.tag || "default").replaceAll(" ", "-");
 }
 
 function setText(el, value) {
@@ -311,12 +316,71 @@ function toggleFavorite(characterId) {
   renderRoster();
 }
 
+function getGossipLine(persona, character, lane, streakCount) {
+  const laneLabel = lane === "right" ? "right lane" : "left lane";
+  const streakLabel = streakCount > 1 ? ` | streak x${streakCount}` : "";
+  const fallback = [
+    `${character.name} just hijacked the ${laneLabel}.`,
+    `${character.name} entered with ${persona.tag} energy.`,
+    `Group chat vote: ${character.name} takes this one.`,
+    `${character.name} is collecting hearts and evidence.`
+  ];
+  const byPersona = {
+    "icy-baddie": [
+      `${character.name} served ice-cold face card on the ${laneLabel}.`,
+      `${character.name} looked once and everyone folded.`,
+      `${character.name} gives couture assassin energy.`
+    ],
+    "villain-crush": [
+      `${character.name} is a bad decision and we support it.`,
+      `${character.name} is giving red carpet menace.`,
+      `${character.name} smirked and the vote ended.`
+    ],
+    "chaos-bestie": [
+      `${character.name} brought drama and we said yes.`,
+      `${character.name} is one glitter bomb away from iconic.`,
+      `${character.name} is the fun option every time.`
+    ],
+    "cute-menace": [
+      `${character.name} looks sweet and fights dirty.`,
+      `${character.name} is cute with criminal intent.`,
+      `${character.name} weaponized sparkle again.`
+    ],
+    "rich-girl-aura": [
+      `${character.name} arrived in first class confidence.`,
+      `${character.name} is expensive taste in character form.`,
+      `${character.name} just won with private-school posture.`
+    ],
+    "soft-power": [
+      `${character.name} ended the debate politely.`,
+      `${character.name} is calm, classy, and undefeated.`,
+      `${character.name} said less and won more.`
+    ]
+  };
+  const slug = getPersonaSlug(persona);
+  const pool = byPersona[slug] || fallback;
+  const line = pool[Math.floor(Math.random() * pool.length)];
+  return `${line}${streakLabel}`;
+}
+
+function announceVote(character, lane, streakCount) {
+  if (!voteAnnouncerEl || !character) {
+    return;
+  }
+  const persona = getPersonaPack(character);
+  voteAnnouncerEl.textContent = getGossipLine(persona, character, lane, streakCount);
+  voteAnnouncerEl.classList.remove("is-popping");
+  void voteAnnouncerEl.offsetWidth;
+  voteAnnouncerEl.classList.add("is-popping");
+}
+
 function buildCard(character, lane) {
   const card = characterCardTemplate.content.firstElementChild.cloneNode(true);
   card.dataset.characterId = character.id;
+  card.dataset.lane = lane;
   const persona = getPersonaPack(character);
   card.dataset.memeTag = persona.tag || memeTags[Math.floor(Math.random() * memeTags.length)];
-  card.dataset.persona = (persona.tag || "default").replaceAll(" ", "-");
+  card.dataset.persona = getPersonaSlug(persona);
   const nameEl = card.querySelector(".character-name");
   const initialEl = card.querySelector(".character-initial");
   const photo = card.querySelector(".character-photo");
@@ -510,7 +574,7 @@ function openCelebration(character, isTournamentWin = false) {
   if (cardEl) {
     cardEl.style.setProperty("--win-a", character.accentA);
     cardEl.style.setProperty("--win-b", character.accentB);
-    cardEl.dataset.persona = (persona.tag || "default").replaceAll(" ", "-");
+    cardEl.dataset.persona = getPersonaSlug(persona);
   }
   runConfettiBurst([character.accentA, character.accentB, "#ffffff", "#ffe08c"]);
   playCelebrationSound();
@@ -619,6 +683,7 @@ async function onVote(characterId, lane = null) {
   if (streak > sessionBestStreak) {
     sessionBestStreak = streak;
   }
+  announceVote(getCharacterById(championId), lane || championSide, streak);
   updateStatusText();
 
   if (streak >= streakTarget) {
