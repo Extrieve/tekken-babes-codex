@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: tekken-babes
+    runtime: node
+    plan: free
+    autoDeploy: true
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.11.1
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: tekken-babes-data
+      mountPath: /var/data
+      sizeGB: 1

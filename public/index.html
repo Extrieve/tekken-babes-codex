@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tekken Babes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Racing+Sans+One&family=Space+Grotesk:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-a"></div>
+    <div class="bg-orb orb-b"></div>
+
+    <main class="layout">
+      <header class="hero">
+        <p class="eyebrow">Tekken Babes</p>
+        <h1>Who Is The Hottest?</h1>
+        <p class="subtitle">
+          Pick between two icons. Keep a fighter alive for 5 straight votes to trigger a victory celebration.
+        </p>
+      </header>
+
+      <section class="status-panel">
+        <div class="status-item">
+          <span class="label">Current Champion</span>
+          <strong id="championName">No champion yet</strong>
+        </div>
+        <div class="status-item">
+          <span class="label">Streak</span>
+          <strong><span id="streakCount">0</span> / 5</strong>
+        </div>
+      </section>
+
+      <section class="arena" id="arena"></section>
+
+      <section class="leaderboard-wrap">
+        <h2>Global Leaderboard</h2>
+        <p class="leaderboard-note">Characters with the most 5-streak crowns rise to the top.</p>
+        <ol id="leaderboard" class="leaderboard"></ol>
+      </section>
+    </main>
+
+    <section id="celebrationScreen" class="celebration hidden" aria-live="polite">
+      <div class="celebration-card">
+        <p class="eyebrow">Crown Secured</p>
+        <h2 id="celebrationName"></h2>
+        <p id="celebrationQuote" class="celebration-quote"></p>
+        <button id="nextRoundBtn" class="action-button">Start New Round</button>
+      </div>
+    </section>
+
+    <template id="characterCardTemplate">
+      <button class="character-card" type="button">
+        <div class="character-art">
+          <span class="character-initial"></span>
+        </div>
+        <div class="character-meta">
+          <h3 class="character-name"></h3>
+          <p class="character-tagline">Tap to vote hottest</p>
+        </div>
+      </button>
+    </template>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>

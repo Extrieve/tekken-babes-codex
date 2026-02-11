@@ -1,0 +1,23 @@
+{
+  "name": "tekken-babes-codex",
+  "version": "1.0.0",
+  "description": "Tekken Babes showdown game with streak celebrations and global leaderboard.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "tekken",
+    "game",
+    "leaderboard",
+    "express",
+    "sqlite"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "express": "^4.21.2"
+  }
+}

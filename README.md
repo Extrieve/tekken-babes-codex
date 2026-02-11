@@ -1,0 +1,47 @@
+# Tekken Babes
+
+Fun voting game: two Tekken characters appear side by side, players choose the hottest, and the selected character stays on screen as champion. If a character hits a 5-vote streak, a celebration screen appears and the global leaderboard records a crown.
+
+## Features
+
+- Side-by-side character voting UI
+- Champion persistence between rounds
+- 5-streak win condition with character-themed celebration
+- Sassy character quotes on victory
+- Global leaderboard persisted in SQLite
+
+## Tech Stack
+
+- Node.js + Express
+- SQLite (`better-sqlite3`)
+- Vanilla HTML/CSS/JS frontend
+
+## Run Locally
+
+```bash
+npm install
+npm start
+```
+
+App runs at `http://localhost:3000`.
+
+## Environment
+
+- `PORT` (optional): server port (default `3000`)
+- `DATA_DIR` (optional): directory for SQLite file (default `./data`)
+
+## Deploy on Render
+
+This repo includes `render.yaml` for one-click blueprint deploy.
+
+1. Push this repo to GitHub (public).
+2. In Render, choose `New +` -> `Blueprint`.
+3. Select this repository.
+4. Render will create a web service + persistent disk.
+5. Open your deployed URL and start voting.
+
+## API
+
+- `GET /api/characters`
+- `GET /api/leaderboard`
+- `POST /api/wins` with JSON `{ "characterId": "jin" }`

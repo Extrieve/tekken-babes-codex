@@ -1,0 +1,241 @@
+:root {
+  --bg-1: #101b2d;
+  --bg-2: #221339;
+  --ink: #f8f3e8;
+  --muted: #c3b9d8;
+  --card: #1a1431d9;
+  --card-border: #ff9f1c66;
+  --accent: #ff5e5b;
+  --accent-2: #ffd166;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at 20% 20%, #3f2f7f 0%, transparent 40%),
+    radial-gradient(circle at 85% 10%, #8d2347 0%, transparent 45%),
+    linear-gradient(140deg, var(--bg-1), var(--bg-2));
+  overflow-x: hidden;
+}
+
+.layout {
+  width: min(1080px, 92vw);
+  margin: 0 auto;
+  padding: 2.5rem 0 4rem;
+}
+
+.hero h1,
+.leaderboard-wrap h2,
+.celebration h2 {
+  font-family: "Racing Sans One", sans-serif;
+  letter-spacing: 0.03em;
+}
+
+.hero h1 {
+  margin: 0.1rem 0 0.5rem;
+  font-size: clamp(2rem, 4.2vw, 3.4rem);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--accent-2);
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.subtitle {
+  margin: 0;
+  max-width: 70ch;
+  color: var(--muted);
+}
+
+.status-panel {
+  margin-top: 1.4rem;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.status-item {
+  border: 1px solid #ffffff30;
+  background: #10131ccf;
+  border-radius: 14px;
+  padding: 0.8rem 1rem;
+}
+
+.status-item .label {
+  display: block;
+  font-size: 0.85rem;
+  color: #d2cae4;
+}
+
+.status-item strong {
+  font-size: 1.1rem;
+}
+
+.arena {
+  margin-top: 1.3rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.character-card {
+  width: 100%;
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  color: inherit;
+  border-radius: 18px;
+  padding: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.character-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px #00000060;
+  border-color: #ffe089bb;
+}
+
+.character-art {
+  border-radius: 14px;
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 0.9rem;
+}
+
+.character-initial {
+  font-family: "Racing Sans One", sans-serif;
+  font-size: clamp(4rem, 12vw, 7rem);
+  color: #ffffffd0;
+  text-shadow: 0 8px 20px #00000070;
+}
+
+.character-name {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.character-tagline {
+  margin: 0.3rem 0 0;
+  color: #e4dcf4;
+}
+
+.leaderboard-wrap {
+  margin-top: 2rem;
+}
+
+.leaderboard-note {
+  margin: 0.25rem 0 0.9rem;
+  color: var(--muted);
+}
+
+.leaderboard {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.leaderboard li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ffffff24;
+  border-radius: 12px;
+  padding: 0.7rem 0.9rem;
+  background: #11192de0;
+}
+
+.leaderboard .wins {
+  font-weight: 700;
+  color: var(--accent-2);
+}
+
+.celebration {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(5px);
+  background: #090611a8;
+  z-index: 20;
+  padding: 1rem;
+}
+
+.celebration.hidden {
+  display: none;
+}
+
+.celebration-card {
+  width: min(560px, 94vw);
+  border-radius: 18px;
+  padding: 2rem;
+  box-shadow: 0 22px 44px #0000006b;
+}
+
+.celebration h2 {
+  margin: 0.4rem 0;
+  font-size: clamp(2rem, 6vw, 3rem);
+}
+
+.celebration-quote {
+  font-size: 1.15rem;
+  line-height: 1.5;
+  margin-bottom: 1.4rem;
+}
+
+.action-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.72rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #fff8e6;
+  color: #1b1a27;
+  font-weight: 700;
+}
+
+.bg-orb {
+  position: fixed;
+  border-radius: 999px;
+  filter: blur(90px);
+  opacity: 0.35;
+  z-index: -1;
+}
+
+.orb-a {
+  width: 420px;
+  height: 420px;
+  background: #ff6f3c;
+  left: -120px;
+  top: -130px;
+}
+
+.orb-b {
+  width: 460px;
+  height: 460px;
+  background: #f72585;
+  right: -140px;
+  bottom: -160px;
+}
+
+@media (max-width: 820px) {
+  .arena {
+    grid-template-columns: 1fr;
+  }
+
+  .character-art {
+    min-height: 180px;
+  }
+}
