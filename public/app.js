@@ -4,13 +4,21 @@ const streakCountEl = document.getElementById("streakCount");
 const leaderboardEl = document.getElementById("leaderboard");
 const historyListEl = document.getElementById("historyList");
 const modeFiltersEl = document.getElementById("modeFilters");
+const modeFiltersCloneEl = document.getElementById("modeFiltersClone");
 const sessionVotesEl = document.getElementById("sessionVotes");
 const sessionBestStreakEl = document.getElementById("sessionBestStreak");
 const searchInputEl = document.getElementById("searchInput");
+const searchInputCloneEl = document.getElementById("searchInputClone");
 const favoritesOnlyBtn = document.getElementById("favoritesOnlyBtn");
+const favoritesOnlyBtnClone = document.getElementById("favoritesOnlyBtnClone");
 const tournamentTargetEl = document.getElementById("tournamentTarget");
 const resetTournamentBtn = document.getElementById("resetTournamentBtn");
 const tournamentBoardEl = document.getElementById("tournamentBoard");
+const tabArenaEl = document.getElementById("tabArena");
+const tabRosterEl = document.getElementById("tabRoster");
+const arenaViewEl = document.getElementById("arenaView");
+const rosterViewEl = document.getElementById("rosterView");
+const rosterGridEl = document.getElementById("rosterGrid");
 const celebrationScreenEl = document.getElementById("celebrationScreen");
 const celebrationNameEl = document.getElementById("celebrationName");
 const celebrationQuoteEl = document.getElementById("celebrationQuote");
@@ -31,6 +39,7 @@ const MODES = [
 
 let characters = [];
 let championId = null;
+let championSide = "left";
 let streak = 0;
 let roundPair = [];
 let activeModeId = "all";
@@ -202,7 +211,11 @@ function pickRoundPair() {
   }
 
   const challenger = randomCharacter(roster, [champion.id]);
-  roundPair = [champion, challenger];
+  if (championSide === "right") {
+    roundPair = [challenger, champion];
+  } else {
+    roundPair = [champion, challenger];
+  }
 }
 
 function toggleFavorite(characterId) {
@@ -213,9 +226,10 @@ function toggleFavorite(characterId) {
   }
   persistFavorites();
   renderArena();
+  renderRoster();
 }
 
-function buildCard(character) {
+function buildCard(character, lane) {
   const card = characterCardTemplate.content.firstElementChild.cloneNode(true);
   card.dataset.characterId = character.id;
   const nameEl = card.querySelector(".character-name");
@@ -229,6 +243,11 @@ function buildCard(character) {
   if (photo) {
     photo.src = character.imageUrl;
     photo.alt = `${character.name} stylized portrait`;
+    photo.addEventListener("error", () => {
+      if (character.fallbackImageUrl && photo.src.indexOf(character.fallbackImageUrl) === -1) {
+        photo.src = character.fallbackImageUrl;
+      }
+    });
   }
   if (favoriteBtn) {
     favoriteBtn.classList.toggle("is-favorite", favorites.has(character.id));
@@ -238,11 +257,11 @@ function buildCard(character) {
     });
   }
 
-  card.addEventListener("click", () => onVote(character.id));
+  card.addEventListener("click", () => onVote(character.id, lane));
   card.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      onVote(character.id);
+      onVote(character.id, lane);
     }
   });
   return card;
@@ -256,8 +275,31 @@ function renderArena() {
     roundPair = [];
     return;
   }
-  for (const character of roundPair) {
-    arenaEl.appendChild(buildCard(character));
+  roundPair.forEach((character, index) => {
+    arenaEl.appendChild(buildCard(character, index === 0 ? "left" : "right"));
+  });
+}
+
+function renderRoster() {
+  if (!rosterGridEl) {
+    return;
+  }
+  const roster = getModeRoster().sort((a, b) => a.name.localeCompare(b.name));
+  rosterGridEl.innerHTML = "";
+  for (const character of roster) {
+    const card = document.createElement("article");
+    card.className = "roster-card";
+    card.dataset.characterId = character.id;
+    const fav = favorites.has(character.id) ? "x" : "+";
+    card.innerHTML = `<img alt="${character.name}" src="${character.imageUrl}" /><div class="meta"><span>${character.name}</span><span>${fav}</span></div>`;
+    const img = card.querySelector("img");
+    img.addEventListener("error", () => {
+      if (character.fallbackImageUrl && img.src.indexOf(character.fallbackImageUrl) === -1) {
+        img.src = character.fallbackImageUrl;
+      }
+    });
+    card.addEventListener("click", () => toggleFavorite(character.id));
+    rosterGridEl.appendChild(card);
   }
 }
 
@@ -379,21 +421,27 @@ function closeCelebration() {
 }
 
 function renderModeFilters() {
-  if (!modeFiltersEl) {
+  const containers = [modeFiltersEl, modeFiltersCloneEl].filter(Boolean);
+  if (!containers.length) {
     return;
   }
-  modeFiltersEl.innerHTML = "";
-  for (const mode of MODES) {
-    const button = document.createElement("button");
-    button.className = `mode-chip${mode.id === activeModeId ? " active" : ""}`;
-    button.type = "button";
-    button.textContent = mode.label;
-    button.addEventListener("click", () => {
-      activeModeId = mode.id;
-      resetRoundState(true);
-      renderModeFilters();
-    });
-    modeFiltersEl.appendChild(button);
+  const onChangeMode = (modeId) => {
+    activeModeId = modeId;
+    resetRoundState(true);
+    renderModeFilters();
+    renderRoster();
+  };
+
+  for (const container of containers) {
+    container.innerHTML = "";
+    for (const mode of MODES) {
+      const button = document.createElement("button");
+      button.className = `mode-chip${mode.id === activeModeId ? " active" : ""}`;
+      button.type = "button";
+      button.textContent = mode.label;
+      button.addEventListener("click", () => onChangeMode(mode.id));
+      container.appendChild(button);
+    }
   }
 }
 
@@ -402,6 +450,7 @@ function resetRoundState(forceResetChampion = false) {
   const championStillInMode = roster.some((character) => character.id === championId);
   if (forceResetChampion || !championStillInMode) {
     championId = null;
+    championSide = "left";
     streak = 0;
   }
   updateStatusText();
@@ -411,14 +460,15 @@ function resetRoundState(forceResetChampion = false) {
     roundPair = [];
   }
   renderArena();
+  renderRoster();
 }
 
 function updateFavoritesOnlyLabel() {
-  if (!favoritesOnlyBtn) {
-    return;
+  const buttons = [favoritesOnlyBtn, favoritesOnlyBtnClone].filter(Boolean);
+  for (const button of buttons) {
+    button.textContent = `Favorites Only: ${favoritesOnly ? "On" : "Off"}`;
+    button.classList.toggle("active", favoritesOnly);
   }
-  favoritesOnlyBtn.textContent = `Favorites Only: ${favoritesOnly ? "On" : "Off"}`;
-  favoritesOnlyBtn.classList.toggle("active", favoritesOnly);
 }
 
 function downloadWinnerCard(character) {
@@ -450,12 +500,15 @@ function downloadWinnerCard(character) {
   link.click();
 }
 
-async function onVote(characterId) {
+async function onVote(characterId, lane = null) {
   sessionVotes += 1;
   if (championId === characterId) {
     streak += 1;
   } else {
     championId = characterId;
+    if (lane) {
+      championSide = lane;
+    }
     streak = 1;
   }
   if (streak > sessionBestStreak) {
@@ -483,6 +536,7 @@ if (nextRoundBtn) {
   nextRoundBtn.addEventListener("click", () => {
     closeCelebration();
     championId = null;
+    championSide = "left";
     streak = 0;
     updateStatusText();
     const winner = checkTournamentWinner();
@@ -506,15 +560,51 @@ if (downloadCardBtn) {
 if (searchInputEl) {
   searchInputEl.addEventListener("input", (event) => {
     searchTerm = event.target.value;
+    if (searchInputCloneEl && searchInputCloneEl.value !== searchTerm) {
+      searchInputCloneEl.value = searchTerm;
+    }
+    resetRoundState(true);
+  });
+}
+
+const onToggleFavoritesOnly = () => {
+  favoritesOnly = !favoritesOnly;
+  updateFavoritesOnlyLabel();
+  resetRoundState(true);
+};
+
+if (searchInputCloneEl) {
+  searchInputCloneEl.addEventListener("input", (event) => {
+    searchTerm = event.target.value;
+    if (searchInputEl && searchInputEl.value !== searchTerm) {
+      searchInputEl.value = searchTerm;
+    }
     resetRoundState(true);
   });
 }
 
 if (favoritesOnlyBtn) {
-  favoritesOnlyBtn.addEventListener("click", () => {
-    favoritesOnly = !favoritesOnly;
-    updateFavoritesOnlyLabel();
-    resetRoundState(true);
+  favoritesOnlyBtn.addEventListener("click", onToggleFavoritesOnly);
+}
+
+if (favoritesOnlyBtnClone) {
+  favoritesOnlyBtnClone.addEventListener("click", onToggleFavoritesOnly);
+}
+
+if (tabArenaEl && tabRosterEl && arenaViewEl && rosterViewEl) {
+  tabArenaEl.addEventListener("click", () => {
+    tabArenaEl.classList.add("active");
+    tabRosterEl.classList.remove("active");
+    arenaViewEl.classList.remove("hidden");
+    rosterViewEl.classList.add("hidden");
+  });
+
+  tabRosterEl.addEventListener("click", () => {
+    tabRosterEl.classList.add("active");
+    tabArenaEl.classList.remove("active");
+    rosterViewEl.classList.remove("hidden");
+    arenaViewEl.classList.add("hidden");
+    renderRoster();
   });
 }
 
@@ -538,10 +628,10 @@ document.addEventListener("keydown", (event) => {
     return;
   }
   if (event.key === "ArrowLeft" && roundPair[0]) {
-    onVote(roundPair[0].id);
+    onVote(roundPair[0].id, "left");
   }
   if (event.key === "ArrowRight" && roundPair[1]) {
-    onVote(roundPair[1].id);
+    onVote(roundPair[1].id, "right");
   }
 });
 
@@ -564,10 +654,14 @@ async function init() {
     if (searchInputEl) {
       searchInputEl.value = "";
     }
+    if (searchInputCloneEl) {
+      searchInputCloneEl.value = "";
+    }
   }
   resetRoundState(true);
   renderTournamentBoard();
   await Promise.all([loadLeaderboard(), loadHistory()]);
+  renderRoster();
 }
 
 init().catch((error) => {

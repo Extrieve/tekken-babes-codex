@@ -62,6 +62,16 @@ body {
   font-size: 0.9rem;
 }
 
+.view-tabs {
+  margin-top: 0.8rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.hidden {
+  display: none;
+}
+
 .status-panel {
   margin-top: 1.4rem;
   display: grid;
@@ -116,6 +126,41 @@ body {
   background: #0b1120;
   color: #f8f3e8;
   padding: 0.45rem 0.85rem;
+}
+
+.roster-view {
+  margin-top: 1rem;
+}
+
+.roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0.75rem;
+}
+
+.roster-card {
+  border: 1px solid #ffffff24;
+  border-radius: 12px;
+  background: #11192de0;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.roster-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: center 20%;
+  filter: saturate(0.92) contrast(1.08) brightness(0.95);
+}
+
+.roster-card .meta {
+  padding: 0.55rem 0.6rem 0.65rem;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .mode-chip {
@@ -203,7 +248,7 @@ body {
   height: 100%;
   object-fit: cover;
   object-position: center 20%;
-  filter: saturate(1.08) contrast(1.02);
+  filter: saturate(0.92) contrast(1.08) brightness(0.96);
 }
 
 .character-art::after {

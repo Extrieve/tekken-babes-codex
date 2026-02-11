@@ -132,7 +132,8 @@ app.get("/api/characters", async (_req, res) => {
   }
   const payload = characters.map((character) => ({
     ...character,
-    imageUrl: characterImageUrlById.get(character.id) || fallbackImageUrl(character.id)
+    imageUrl: characterImageUrlById.get(character.id) || fallbackImageUrl(character.id),
+    fallbackImageUrl: fallbackImageUrl(character.id)
   }));
   res.json({ characters: payload });
 });

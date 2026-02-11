@@ -26,52 +26,72 @@
         <p class="subtitle key-hint">Pro tip: use left/right arrow keys to vote fast.</p>
       </header>
 
-      <section class="status-panel">
-        <div class="status-item">
-          <span class="label">Current Champion</span>
-          <strong id="championName">No champion yet</strong>
-        </div>
-        <div class="status-item">
-          <span class="label">Streak</span>
-          <strong><span id="streakCount">0</span> / 5</strong>
-        </div>
-        <div class="status-item">
-          <span class="label">Session Votes</span>
-          <strong id="sessionVotes">0</strong>
-        </div>
-        <div class="status-item">
-          <span class="label">Longest Session Streak</span>
-          <strong id="sessionBestStreak">0</strong>
-        </div>
+      <section class="view-tabs">
+        <button id="tabArena" class="mode-chip active" type="button">Arena</button>
+        <button id="tabRoster" class="mode-chip" type="button">Full Roster</button>
       </section>
 
-      <section class="mode-panel">
-        <span class="label">Roster Mode</span>
-        <div class="mode-filters" id="modeFilters"></div>
-        <div class="mode-tools">
-          <input id="searchInput" class="search-input" type="search" placeholder="Search character name..." />
-          <button id="favoritesOnlyBtn" class="mode-chip" type="button">Favorites Only: Off</button>
-        </div>
+      <section id="arenaView">
+        <section class="status-panel">
+          <div class="status-item">
+            <span class="label">Current Champion</span>
+            <strong id="championName">No champion yet</strong>
+          </div>
+          <div class="status-item">
+            <span class="label">Streak</span>
+            <strong><span id="streakCount">0</span> / 5</strong>
+          </div>
+          <div class="status-item">
+            <span class="label">Session Votes</span>
+            <strong id="sessionVotes">0</strong>
+          </div>
+          <div class="status-item">
+            <span class="label">Longest Session Streak</span>
+            <strong id="sessionBestStreak">0</strong>
+          </div>
+        </section>
+
+        <section class="mode-panel">
+          <span class="label">Roster Mode</span>
+          <div class="mode-filters" id="modeFilters"></div>
+          <div class="mode-tools">
+            <input id="searchInput" class="search-input" type="search" placeholder="Search character name..." />
+            <button id="favoritesOnlyBtn" class="mode-chip" type="button">Favorites Only: Off</button>
+          </div>
+        </section>
+
+        <section class="tournament-panel">
+          <div>
+            <span class="label">Tournament Mode</span>
+            <p class="leaderboard-note">First to target crowns wins the session tournament.</p>
+          </div>
+          <div class="tournament-controls">
+            <label for="tournamentTarget">Target Crowns</label>
+            <select id="tournamentTarget">
+              <option value="1">1</option>
+              <option value="3" selected>3</option>
+              <option value="5">5</option>
+            </select>
+            <button id="resetTournamentBtn" class="mode-chip" type="button">Reset Tournament</button>
+          </div>
+          <ol id="tournamentBoard" class="leaderboard"></ol>
+        </section>
+
+        <section class="arena" id="arena"></section>
       </section>
 
-      <section class="tournament-panel">
-        <div>
-          <span class="label">Tournament Mode</span>
-          <p class="leaderboard-note">First to target crowns wins the session tournament.</p>
-        </div>
-        <div class="tournament-controls">
-          <label for="tournamentTarget">Target Crowns</label>
-          <select id="tournamentTarget">
-            <option value="1">1</option>
-            <option value="3" selected>3</option>
-            <option value="5">5</option>
-          </select>
-          <button id="resetTournamentBtn" class="mode-chip" type="button">Reset Tournament</button>
-        </div>
-        <ol id="tournamentBoard" class="leaderboard"></ol>
+      <section id="rosterView" class="roster-view hidden">
+        <section class="mode-panel">
+          <span class="label">Roster Filters</span>
+          <div class="mode-filters" id="modeFiltersClone"></div>
+          <div class="mode-tools">
+            <input id="searchInputClone" class="search-input" type="search" placeholder="Search character name..." />
+            <button id="favoritesOnlyBtnClone" class="mode-chip" type="button">Favorites Only: Off</button>
+          </div>
+        </section>
+        <p class="leaderboard-note">Complete filtered roster. Tap a portrait to favorite it.</p>
+        <div id="rosterGrid" class="roster-grid"></div>
       </section>
-
-      <section class="arena" id="arena"></section>
 
       <div class="meta-grid">
         <section class="leaderboard-wrap">
