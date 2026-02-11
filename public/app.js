@@ -45,6 +45,12 @@ let tournamentTarget = 3;
 let tournamentScores = {};
 let lastCrownWinner = null;
 
+function setText(el, value) {
+  if (el) {
+    el.textContent = value;
+  }
+}
+
 function loadFavorites() {
   try {
     const raw = localStorage.getItem(favoritesStorageKey);
@@ -175,10 +181,10 @@ function randomCharacter(pool, excludeIds = []) {
 
 function updateStatusText() {
   const champion = characters.find((character) => character.id === championId);
-  championNameEl.textContent = champion ? champion.name : "No champion yet";
-  streakCountEl.textContent = String(streak);
-  sessionVotesEl.textContent = String(sessionVotes);
-  sessionBestStreakEl.textContent = String(sessionBestStreak);
+  setText(championNameEl, champion ? champion.name : "No champion yet");
+  setText(streakCountEl, String(streak));
+  setText(sessionVotesEl, String(sessionVotes));
+  setText(sessionBestStreakEl, String(sessionBestStreak));
 }
 
 function pickRoundPair() {
@@ -301,6 +307,9 @@ function getCharacterById(id) {
 }
 
 function renderTournamentBoard() {
+  if (!tournamentBoardEl) {
+    return;
+  }
   tournamentBoardEl.innerHTML = "";
   const entries = Object.entries(tournamentScores)
     .sort((a, b) => b[1] - a[1])
@@ -356,6 +365,9 @@ function closeCelebration() {
 }
 
 function renderModeFilters() {
+  if (!modeFiltersEl) {
+    return;
+  }
   modeFiltersEl.innerHTML = "";
   for (const mode of MODES) {
     const button = document.createElement("button");
@@ -388,6 +400,9 @@ function resetRoundState(forceResetChampion = false) {
 }
 
 function updateFavoritesOnlyLabel() {
+  if (!favoritesOnlyBtn) {
+    return;
+  }
   favoritesOnlyBtn.textContent = `Favorites Only: ${favoritesOnly ? "On" : "Off"}`;
   favoritesOnlyBtn.classList.toggle("active", favoritesOnly);
 }
@@ -450,47 +465,59 @@ async function onVote(characterId) {
   renderArena();
 }
 
-nextRoundBtn.addEventListener("click", () => {
-  closeCelebration();
-  championId = null;
-  streak = 0;
-  updateStatusText();
-  const winner = checkTournamentWinner();
-  if (winner) {
+if (nextRoundBtn) {
+  nextRoundBtn.addEventListener("click", () => {
+    closeCelebration();
+    championId = null;
+    streak = 0;
+    updateStatusText();
+    const winner = checkTournamentWinner();
+    if (winner) {
+      tournamentScores = {};
+      renderTournamentBoard();
+    }
+    pickRoundPair();
+    renderArena();
+  });
+}
+
+if (downloadCardBtn) {
+  downloadCardBtn.addEventListener("click", () => {
+    if (lastCrownWinner) {
+      downloadWinnerCard(lastCrownWinner);
+    }
+  });
+}
+
+if (searchInputEl) {
+  searchInputEl.addEventListener("input", (event) => {
+    searchTerm = event.target.value;
+    resetRoundState(true);
+  });
+}
+
+if (favoritesOnlyBtn) {
+  favoritesOnlyBtn.addEventListener("click", () => {
+    favoritesOnly = !favoritesOnly;
+    updateFavoritesOnlyLabel();
+    resetRoundState(true);
+  });
+}
+
+if (tournamentTargetEl) {
+  tournamentTargetEl.addEventListener("change", () => {
+    tournamentTarget = Number(tournamentTargetEl.value) || 3;
     tournamentScores = {};
     renderTournamentBoard();
-  }
-  pickRoundPair();
-  renderArena();
-});
+  });
+}
 
-downloadCardBtn.addEventListener("click", () => {
-  if (lastCrownWinner) {
-    downloadWinnerCard(lastCrownWinner);
-  }
-});
-
-searchInputEl.addEventListener("input", (event) => {
-  searchTerm = event.target.value;
-  resetRoundState(true);
-});
-
-favoritesOnlyBtn.addEventListener("click", () => {
-  favoritesOnly = !favoritesOnly;
-  updateFavoritesOnlyLabel();
-  resetRoundState(true);
-});
-
-tournamentTargetEl.addEventListener("change", () => {
-  tournamentTarget = Number(tournamentTargetEl.value) || 3;
-  tournamentScores = {};
-  renderTournamentBoard();
-});
-
-resetTournamentBtn.addEventListener("click", () => {
-  tournamentScores = {};
-  renderTournamentBoard();
-});
+if (resetTournamentBtn) {
+  resetTournamentBtn.addEventListener("click", () => {
+    tournamentScores = {};
+    renderTournamentBoard();
+  });
+}
 
 document.addEventListener("keydown", (event) => {
   if (!celebrationScreenEl.classList.contains("hidden")) {
