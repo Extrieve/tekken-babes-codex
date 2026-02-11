@@ -64,6 +64,77 @@ const winSublines = [
   "This was not a close call.",
   "Zero effort, maximum slay."
 ];
+const PERSONA_PACK = {
+  nina: {
+    tag: "icy baddie",
+    badge: "She Did That",
+    subline: "Operative glam. Zero mercy. Full slay."
+  },
+  lili: {
+    tag: "rich girl aura",
+    badge: "Runway KO",
+    subline: "High tea posture, low blow confidence."
+  },
+  asuka: {
+    tag: "chaos bestie",
+    badge: "Messy Queen",
+    subline: "No filter. No fear. No survivors."
+  },
+  xiaoyu: {
+    tag: "cute menace",
+    badge: "Sparkle Damage",
+    subline: "Adorable? yes. Harmless? absolutely not."
+  },
+  reina: {
+    tag: "villain crush",
+    badge: "Cold Girl Summer",
+    subline: "Smirk level: illegal in 48 states."
+  },
+  jin: {
+    tag: "brooding icon",
+    badge: "Drama King",
+    subline: "Mood swings, jawline, and championship aura."
+  },
+  kazuya: {
+    tag: "red flag deluxe",
+    badge: "Toxic But Hot",
+    subline: "The group chat said no. The heart said yes."
+  },
+  hwoarang: {
+    tag: "bike bf energy",
+    badge: "Street Heat",
+    subline: "Zero brakes. Maximum flirt."
+  },
+  alisa: {
+    tag: "sweet threat",
+    badge: "Cute And Lethal",
+    subline: "Factory settings: pretty and terrifying."
+  },
+  paul: {
+    tag: "himbo legend",
+    badge: "Chaos Crush",
+    subline: "Not subtle, never sorry, always serving."
+  },
+  king: {
+    tag: "masked heartthrob",
+    badge: "Ring Royalty",
+    subline: "Who needs words when the aura screams."
+  },
+  jun: {
+    tag: "soft power",
+    badge: "Grace Won",
+    subline: "Kind eyes. Killer focus. Diary entry secured."
+  },
+  default: {
+    tag: "hot topic",
+    badge: "Locker Room Pick",
+    subline: "Group-chat approved and diary-certified."
+  }
+};
+
+function getPersonaPack(character) {
+  return PERSONA_PACK[character.id] || PERSONA_PACK.default;
+}
 
 function setText(el, value) {
   if (el) {
@@ -243,7 +314,9 @@ function toggleFavorite(characterId) {
 function buildCard(character, lane) {
   const card = characterCardTemplate.content.firstElementChild.cloneNode(true);
   card.dataset.characterId = character.id;
-  card.dataset.memeTag = memeTags[Math.floor(Math.random() * memeTags.length)];
+  const persona = getPersonaPack(character);
+  card.dataset.memeTag = persona.tag || memeTags[Math.floor(Math.random() * memeTags.length)];
+  card.dataset.persona = (persona.tag || "default").replaceAll(" ", "-");
   const nameEl = card.querySelector(".character-name");
   const initialEl = card.querySelector(".character-initial");
   const photo = card.querySelector(".character-photo");
@@ -303,7 +376,8 @@ function renderRoster() {
     card.className = "roster-card";
     card.dataset.characterId = character.id;
     const fav = favorites.has(character.id) ? "x" : "+";
-    card.innerHTML = `<img alt="${character.name}" src="${character.imageUrl}" /><div class="meta"><span>${character.name}</span><span>${fav}</span></div>`;
+    const persona = getPersonaPack(character);
+    card.innerHTML = `<img alt="${character.name}" src="${character.imageUrl}" /><div class="meta"><span>${character.name}</span><span>${fav}</span></div><p class="roster-persona">${persona.tag}</p>`;
     const img = card.querySelector("img");
     img.addEventListener("error", () => {
       if (character.fallbackImageUrl && img.src.indexOf(character.fallbackImageUrl) === -1) {
@@ -408,17 +482,18 @@ function checkTournamentWinner() {
 }
 
 function openCelebration(character, isTournamentWin = false) {
+  const persona = getPersonaPack(character);
   celebrationNameEl.textContent = isTournamentWin
     ? `${character.name} Wins The Tournament`
     : `${character.name} Reigns Supreme`;
   celebrationQuoteEl.textContent = isTournamentWin
-    ? `"${character.quote}" Tournament target reached: ${tournamentTarget} crowns.`
-    : `"${character.quote}"`;
+    ? `"${character.quote}" ${persona.subline} Tournament target reached: ${tournamentTarget} crowns.`
+    : `"${character.quote}" ${persona.subline}`;
   if (celebrationSublineEl) {
-    celebrationSublineEl.textContent = winSublines[Math.floor(Math.random() * winSublines.length)];
+    celebrationSublineEl.textContent = persona.subline || winSublines[Math.floor(Math.random() * winSublines.length)];
   }
   if (celebrationBadgeEl) {
-    celebrationBadgeEl.textContent = winBadges[Math.floor(Math.random() * winBadges.length)];
+    celebrationBadgeEl.textContent = persona.badge || winBadges[Math.floor(Math.random() * winBadges.length)];
   }
   if (celebrationPortraitEl) {
     celebrationPortraitEl.src = character.imageUrl;
@@ -435,6 +510,7 @@ function openCelebration(character, isTournamentWin = false) {
   if (cardEl) {
     cardEl.style.setProperty("--win-a", character.accentA);
     cardEl.style.setProperty("--win-b", character.accentB);
+    cardEl.dataset.persona = (persona.tag || "default").replaceAll(" ", "-");
   }
   runConfettiBurst([character.accentA, character.accentB, "#ffffff", "#ffe08c"]);
   playCelebrationSound();

@@ -28,6 +28,25 @@ body {
     radial-gradient(circle at 12% 88%, #4f46e53d 0%, transparent 36%),
     linear-gradient(140deg, var(--bg-1), var(--bg-2) 52%, var(--bg-3));
   overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 14% 22%, #ffd1e114 0%, transparent 24%),
+    radial-gradient(circle at 78% 16%, #ffe8b916 0%, transparent 25%),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 24px,
+      #ffffff06 24px,
+      #ffffff06 25px
+    );
+  z-index: -1;
 }
 
 .layout {
@@ -52,6 +71,15 @@ body {
   text-shadow: 0 4px 0 #5a1646, 0 12px 20px #0000007a;
   transform: rotate(-1.2deg);
   transform-origin: left center;
+}
+
+.diary-kicker {
+  margin: 0 0 0.08rem;
+  font-family: "Caveat", cursive;
+  font-size: 1.45rem;
+  color: #ffd6e7;
+  letter-spacing: 0.02em;
+  transform: rotate(-2deg);
 }
 
 .eyebrow {
@@ -92,6 +120,7 @@ body {
   font-size: 0.76rem;
   font-weight: 800;
   text-transform: uppercase;
+  transform: rotate(-1deg);
 }
 
 .view-tabs {
@@ -117,6 +146,19 @@ body {
   background: linear-gradient(150deg, #0f1328f2, #1f1235de);
   padding: 0.72rem 0.95rem;
   box-shadow: inset 0 0 0 1px #ffffff0d;
+  position: relative;
+}
+
+.status-item::before {
+  content: "";
+  position: absolute;
+  width: 48px;
+  height: 12px;
+  background: #ffc6dc70;
+  top: -6px;
+  left: 14px;
+  border-radius: 3px;
+  transform: rotate(-2deg);
 }
 
 .status-item .label {
@@ -134,9 +176,26 @@ body {
   margin-top: 0.95rem;
   border: 1px solid var(--panel-border);
   border-radius: 14px;
-  background: var(--panel);
+  background:
+    linear-gradient(180deg, #ffffff20 0%, #ffffff00 100%),
+    var(--panel);
   padding: 0.85rem 1rem;
   backdrop-filter: blur(3px);
+  box-shadow: 0 10px 24px #00000033;
+  position: relative;
+}
+
+.mode-panel::after,
+.tournament-panel::after {
+  content: "";
+  position: absolute;
+  right: 18px;
+  top: -8px;
+  width: 58px;
+  height: 16px;
+  border-radius: 4px;
+  background: #ffe6a570;
+  transform: rotate(2deg);
 }
 
 .mode-filters {
@@ -162,6 +221,11 @@ body {
   cursor: pointer;
   font-size: 0.87rem;
   font-weight: 600;
+  transition: transform 120ms ease;
+}
+
+.mode-chip:hover {
+  transform: translateY(-1px);
 }
 
 .mode-chip.active {
@@ -239,6 +303,7 @@ body {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   z-index: 4;
+  font-family: "Permanent Marker", cursive;
 }
 
 .character-art {
@@ -316,6 +381,19 @@ body {
 
 .character-meta {
   margin-top: 0.6rem;
+  position: relative;
+}
+
+.character-meta::before {
+  content: "xoxo";
+  position: absolute;
+  right: 0;
+  top: -18px;
+  font-family: "Caveat", cursive;
+  font-size: 1.25rem;
+  color: #ffd8eb;
+  transform: rotate(-6deg);
+  opacity: 0.9;
 }
 
 .character-name {
@@ -325,6 +403,7 @@ body {
   font-family: "Bangers", "Racing Sans One", sans-serif;
   letter-spacing: 0.04em;
   text-shadow: 0 2px 0 #3f1336;
+  text-transform: uppercase;
 }
 
 .character-tagline {
@@ -350,6 +429,7 @@ body {
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.16s ease;
+  position: relative;
 }
 
 .roster-card:hover {
@@ -371,6 +451,13 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.roster-persona {
+  margin: 0 0.6rem 0.7rem;
+  font-family: "Caveat", cursive;
+  font-size: 1.02rem;
+  color: #ffd8ea;
 }
 
 .meta-grid {
@@ -411,6 +498,19 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+}
+
+.leaderboard li::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #ff8fb5;
+  transform: translateY(-50%);
 }
 
 .leaderboard .wins {
@@ -457,6 +557,16 @@ body {
   background: linear-gradient(145deg, var(--win-a, #ff7b00), var(--win-b, #ff3d81));
   box-shadow: 0 24px 48px #00000075;
   animation: winnerPop 360ms ease;
+}
+
+.celebration-card[data-persona="icy-baddie"] .celebration-badge,
+.celebration-card[data-persona="villain-crush"] .celebration-badge {
+  background: linear-gradient(130deg, #b5d7ff, #9a7bff);
+}
+
+.celebration-card[data-persona="chaos-bestie"] .celebration-badge,
+.celebration-card[data-persona="cute-menace"] .celebration-badge {
+  background: linear-gradient(130deg, #ffd770, #ff8cb8);
 }
 
 .celebration-glow {
@@ -515,7 +625,7 @@ body {
 .celebration-copy {
   border-radius: 14px;
   border: 1px solid #ffffff2a;
-  background: #150d24b3;
+  background: #150d24c9;
   padding: 0.8rem 0.95rem;
 }
 
@@ -532,6 +642,7 @@ body {
   color: #ffe9ba;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  font-family: "Permanent Marker", cursive;
 }
 
 .celebration-quote {
@@ -550,6 +661,7 @@ body {
   cursor: pointer;
   background: #fff8e6;
   color: #1b1a27;
+  box-shadow: 0 3px 0 #aa6e18;
 }
 
 .celebration-actions {
